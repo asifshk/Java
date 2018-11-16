@@ -1,0 +1,258 @@
+import java.util.Scanner;
+import java.util.Random;
+
+
+public class AlgebraTutorV2 {
+    
+    static int count_correct_answer_overall = 0;
+    static int count_wrong_answer_overall = 0;
+    static double count_total_answer_overall = count_correct_answer_overall + count_wrong_answer_overall;
+    static double overall_score = 0.0;
+    static String problem_equation = "y = mx + b";
+    
+    public static void main(String[] args) {
+        
+        //initiate a variable to hold user's choice of program
+        int program_choice = 1;
+        
+        //create a new Scanner object to capture keyboard input
+        Scanner user_input = new Scanner(System.in);
+        
+        while (program_choice >= 1 && program_choice <=4) {
+            
+            //display the list of programs to the user
+            fn_display_menu();
+            
+            //collect user's choice
+            program_choice = user_input.nextInt();
+            
+            //and run that program
+            if (program_choice == 1 || program_choice == 2 || program_choice ==3) {
+                fn_eval_answers (program_choice);
+            } else if (program_choice == 4) {
+                System.out.println("--------------------------------------");
+                System.out.println("Thanks for using the Algebra Tutor.");
+                System.out.println("--------------------------------------");
+                System.out.println("Number of correct answers overall = " + count_correct_answer_overall);
+                System.out.println("Number of wrong answers overall = " + count_wrong_answer_overall);
+                //ensure that atleast one question has been answered before calculating the score
+                if (count_correct_answer_overall > 0 || count_wrong_answer_overall >0) {
+                    overall_score = count_correct_answer_overall / count_total_answer_overall; 
+                    System.out.println("Overall Score = " + overall_score);
+                }
+                System.out.println("--------------------------------------------");
+                break;
+            }
+        }
+        
+    }
+    
+    
+    public static void fn_eval_answers(int program_choice) {
+        int count_correct_answer_prog = 0;     //variable to count the number of CORRECT answers for the chosen program.
+        int count_correct_answer_in_row = 0;   //variable to count the number of CORRECT answers in a row. Will be reset to 0 whenever the user gets a WRONG.
+        int count_wrong_answer_prog = 0;       //variable to count the number of WRONG answers for the chosen program.
+        int count_wrong_answer_reset = 0;      //variable that could be reset to 0 when the number of wrong answers reaches 3. 
+                                               //This could potentially happen multiple times even after displaying hints after hints ):
+        double count_total_answer_prog = count_correct_answer_prog + count_wrong_answer_prog;
+        boolean user_answer_eval = false;      //variable to store whether the user's answer was right or wrong
+        double program_score = 0.0;                    //variable to store the program score
+        
+        while (count_correct_answer_in_row < 3) {
+            //based on the program selected, present the question, obtain user's answer and evaluate if the answer is right or wrong
+            //if (program_choice == 1 || program_choice == 2 || program_choice == 3) {
+            
+            user_answer_eval = fn_solve_for_z (program_choice);
+            
+            //} else if (program_choice == 2) {
+            //    user_answer_eval = fn_solve_for_m (program_choice);
+            //} else if (program_choice == 3) {
+            //    user_answer_eval = fn_solve_for_b (program_choice);
+            //}
+            
+            //if the user entered a correct answer
+            if (user_answer_eval == true) {
+                //increment the counter for correct answers 
+                count_correct_answer_prog++;
+                //increment the counter for corrrect answers in a row
+                count_correct_answer_in_row++;
+                //increment the counter for overall tally of correct answers
+                count_correct_answer_overall++;
+                
+                //if the user correctly answered 3 questions in a row, quit this part and show the main menu
+                if (count_correct_answer_in_row == 3) {
+                    System.out.println("------------------------------------------------------------------");
+                    System.out.println("Awesome, you've correctly answered 3 questions in a row. You rock!");
+                    System.out.println("------------------------------------------------------------------");
+                    break;
+                }
+            } else if (user_answer_eval == false) {
+                //if the user enters a wrong answer, reset the correct-answer-in-row counter to 0
+                count_correct_answer_in_row = 0;
+                //increment the counter for wrong answers
+                count_wrong_answer_prog++;
+                //and increment the 'resettable' counter for wrong answers 
+                count_wrong_answer_reset++;
+                //and increment the counter for overall tally of wrong answers
+                count_wrong_answer_overall++;
+                
+                //if the user gets 3 wrongs, provide a hint
+                if (count_wrong_answer_reset == 3) {
+                    //reset the counter to 0, we need this ability so that we can provide further hints if the user gets 3 more wrongs
+                    count_wrong_answer_reset = 0;
+                    //display hint
+                    System.out.println("Man, you really suck. So far you've given " + count_wrong_answer_prog + " answers.");
+                    System.out.println("Here's a hint for you");
+                    System.out.println("Substitute the values of the variables in the equation " + problem_equation + " and solve.");
+                }
+            }
+        }
+        //System.out.println("-----------------------------------------------------------------");
+        System.out.println("Number of correct answers for Program-" + program_choice + " = " + count_correct_answer_prog);
+        System.out.println("Number of wrong answers for Program-" + program_choice + " = " + count_wrong_answer_prog);
+        if (count_correct_answer_prog > 0 || count_wrong_answer_prog > 0) {
+            program_score = count_correct_answer_prog / count_total_answer_prog; 
+            System.out.println("Score for Program-" + program_choice + " = " + program_score);
+        }
+        System.out.println("------------------------------------------------------------------");
+        System.out.println();
+        
+    }
+    
+    
+    public static boolean fn_solve_for_z(int program_choice) {
+        //generate random values for equation variables m, x and b
+        int var_y = fn_generate_random_number();
+        int var_m = fn_generate_random_number();
+        int var_x = fn_generate_random_number();
+        int var_b = fn_generate_random_number();
+        int correct_answer_y = 0;
+        double correct_answer_m = 0;
+        int correct_answer_b = 0;
+       
+        //calculate and store the correct answer based on the values generated above
+        //will need this value to compare against the answer entered by the user
+        //this needs to be done based on user's choice of the program
+        if (program_choice == 1) {                         
+            //-solve for y
+             correct_answer_y = (var_m * var_x) + var_b;
+ 
+             //present the values of equation variables to the user and ask 'em to solve for y
+            fn_display_question(program_choice, var_m, var_x, var_b);
+ 
+        } else if (program_choice == 2) {                  
+            //-solve for m
+             correct_answer_m = (var_y - var_b) / var_x;
+            
+             //present the values of equation variables to the user and ask 'em to solve for m
+            fn_display_question(program_choice, var_y, var_x, var_b);
+ 
+        } else if (program_choice == 3) {                  
+             //-Solve for b
+             correct_answer_b = var_y - (var_m * var_x);
+            
+             //present the values of equation variables to the user and ask 'em to solve for b
+            fn_display_question(program_choice, var_y, var_m, var_x);
+        }
+              
+        //accept the user's answer into a variable
+        Scanner user_input_y = new Scanner (System.in);
+       
+        //compare user's answer to the correct answer calculated by the program
+        int user_answer = user_input_y.nextInt();
+       
+        if (program_choice == 1) {
+            //for use during testing only
+            System.out.println("Correct answer: " + correct_answer_y);
+           
+            //tell the user if the answer is wrong or right
+            if (user_answer == correct_answer_y) {
+                System.out.println("Correct answer.");
+                //return true;
+            } else {
+                System.out.println("WRONG! The correct answer is: " + correct_answer_y);
+               //return false;
+            }
+        } else if (program_choice == 2) {
+            //for use during testing only
+            System.out.println("Correct answer: " + correct_answer_m);
+               
+            //tell the user if the answer is wrong or right
+            if (user_answer == correct_answer_m) {
+                System.out.println("Correct answer.");
+                //return true;
+            } else {
+                System.out.println("WRONG! The correct answer is: " + correct_answer_m);
+                //return false;
+            }
+        } else if (program_choice == 3) {
+            //for use during testing only
+            System.out.println("Correct answer: " + correct_answer_b);
+               
+            //tell the user if the answer is wrong or right
+            if (user_answer == correct_answer_b) {
+                System.out.println("Correct answer.");
+                return true;
+            } else {
+                System.out.println("WRONG! The correct answer is: " + correct_answer_b);
+                return false;
+            }
+        }
+        //if a method is public static "boolean", then it needs to return a boolean in EVERY possible scenario
+        //in this case, if the variable program_choice is not equal to 1,2 or 3; then it just hits the end of function with no return
+        //so, we need to put a "return false" at the end as catch all. (We should also validate user input)
+        return false;
+    }
+    
+    
+    public static void fn_display_menu() {
+        //list of options for the user
+        System.out.println("------Algebra Tutor------");
+        System.out.println(" Select 1 to solve for y");
+        System.out.println(" Select 2 to solve for m");
+        System.out.println(" Select 3 to solve for b");
+        System.out.println(" Select 4 to quit");
+        System.out.println("-------------------------");
+    }
+    
+    
+    public static void fn_display_question(int program_choice, int var_a, int var_c, int var_d) {
+        //display the appropriate questions based on the user's choice of a program
+        if (program_choice == 1) {
+            System.out.println("Given: ");
+            System.out.println("m = " + var_a);
+            System.out.println("x = " + var_c);
+            System.out.println("b = " + var_d);
+            System.out.println(problem_equation);
+            System.out.println("What is the value of y: ");
+        } else if (program_choice == 2) {
+            System.out.println("Given: ");
+            System.out.println("y = " + var_a);
+            System.out.println("x = " + var_c);
+            System.out.println("b = " + var_d);
+            System.out.println(problem_equation);
+            System.out.println("What is the value of m: ");
+        } else if (program_choice == 3) {
+            System.out.println("Given: ");
+            System.out.println("y = " + var_a);
+            System.out.println("m = " + var_c);
+            System.out.println("x = " + var_d);
+            System.out.println(problem_equation);
+            System.out.println("What is the value of b: ");
+        }
+    }
+    
+    
+    public static int fn_generate_random_number() {
+        //create a new random object
+        Random rnd_rand = new Random();
+        
+        //generate a random number between -100 and +100
+        int random_num = -100 + rnd_rand.nextInt(200);
+        
+        //return the generated number to the calling function
+        return random_num;
+    }
+    
+    
+}
