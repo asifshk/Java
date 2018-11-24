@@ -1,0 +1,91 @@
+import java.util.Scanner;               //needed to be able to accept filename from the user
+import java.io.File;                    //needed to read the contents of a file
+import java.io.FileWriter;              //needed to create the output file
+import java.io.BufferedWriter;          //needed to write content into a buffer first and then into a file
+import java.io.IOException;             //needed to catch I/O errors
+import java.io.FileNotFoundException;   //needed to catch file not found errors
+    
+class TrialGroup{
+    private String fileName;
+    private int count;
+    private int sum;
+    private int sumOfSquares;
+    
+    TrialGroup(String fileName) throws FileNotFoundException {
+        this.fileName = fileName;
+        File inputFile = new File(fileName);
+        Scanner fileScanner = new Scanner (inputFile);
+        
+        while (fileScanner.hasNext()) {
+            int fileData = fileScanner.nextInt();
+            count++;
+            //take the total "sum" and add to it the value of fileData
+            sum += fileData;    //so, if sum was 2 and fileData was 3, then sum would become 5
+            sumOfSquares += (fileData * fileData);
+        }
+        fileScanner.close();
+    }
+    
+    public String getFileName() {
+        return this.fileName;
+    }
+    
+    public double getAverage() {
+        double average = (sum * 1.0) / count;
+        return average;
+    }
+    
+    public double getStandardDeviation() {
+        double average = (sum * 1.0) / count;
+        double avgSquared = average * average;
+        double averageOfSquares = sumOfSquares / count;
+        double stdDeviation = Math.sqrt(averageOfSquares - avgSquared);
+        
+        return stdDeviation;
+    }
+
+    public boolean getSignificantDifference(TrialGroup groupA, TrialGroup groupB) {
+        double differenceOfAverage = Math.abs(groupA.getAverage() - groupB.getAverage());
+        boolean check01 = differenceOfAverage > groupA.getStandardDeviation();
+        boolean check02 = differenceOfAverage > groupB.getStandardDeviation();
+    
+        return check01 && check02;
+    }
+
+}
+
+public class PeppersPillMill {
+    public static void main (String[] args) throws IOException {
+        Scanner userInput = new Scanner (System.in);
+        
+        System.out.println ("Enter the name for file# 1: ");
+        String inputFileA = userInput.nextLine();
+        TrialGroup trGroupA = new TrialGroup (inputFileA);
+        
+        System.out.println ("Enter the name for file# 2: ");
+        String inputFileB = userInput.nextLine();
+        TrialGroup trGroupB = new TrialGroup (inputFileB);
+        
+        System.out.println ("Enter the name for file# 3: ");
+        String inputFileC = userInput.nextLine();
+        TrialGroup trGroupC = new TrialGroup (inputFileC);
+        
+        System.out.println ("Enter the name of the output file: ");
+        String outputFile = userInput.nextLine();
+        FileWriter fileWriter = new FileWriter (outputFile);
+        BufferedWriter buffer = new BufferedWriter (fileWriter);
+        
+        buffer.write ("Statistics: \n");
+        buffer.write (inputFileA + " : " + trGroupA.getAverage() + " " + trGroupA.getStandardDeviation() + "\n");
+        buffer.write (inputFileB + " : " + trGroupB.getAverage() + " " + trGroupB.getStandardDeviation() + "\n");
+        buffer.write (inputFileC + " : " + trGroupC.getAverage() + " " + trGroupC.getStandardDeviation() + "\n");
+        
+        buffer.write ("Results: \n");
+        buffer.write (inputFileA + " vs " + inputFileB + " : " + trGroupA.getSignificantDifference(trGroupA, trGroupB) + "\n");
+        buffer.write (inputFileA + " vs " + inputFileC + " : " + trGroupB.getSignificantDifference(trGroupA, trGroupC) + "\n");
+        buffer.write (inputFileB + " vs " + inputFileC + " : " + trGroupC.getSignificantDifference(trGroupB, trGroupC) + "\n");
+        
+        buffer.close();
+        userInput.close();
+    }
+}
